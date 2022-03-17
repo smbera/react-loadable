@@ -6,16 +6,18 @@ type Config = {
 }
 
 export default function reactLoadable(config: Config) {
-    const { component, LoadingComponent = (() => null) } = config
+    const { component, LoadingComponent = (() => 'loading...'), delay = 200 } = config
 
     return class DynamicComponent extends Component {
         mounted = false
         state = {
             FetchComponent: null,
         }
+        static now = null
         constructor(props) {
             super(props)
             this.load()
+            DynamicComponent.now = Date.now()
         }
         componentDidMount() {
             this.mounted = true
@@ -37,7 +39,7 @@ export default function reactLoadable(config: Config) {
             const { FetchComponent } = this.state
             if (FetchComponent) return <FetchComponent {...this.props} />
 
-            return <LoadingComponent {...this.props} />
+            return Date.now() - DynamicComponent.now > delay ? <LoadingComponent {...this.props} /> : null
         }
     }
 }
